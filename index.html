@@ -1,0 +1,117 @@
+<html>
+<head>
+</head>
+<body>
+<p>Web Crypto using RSA-OAEP</p>
+<br>
+
+<script type="text/javascript">
+    function generateKeyPair() {
+        return new Promise(function (resolve) {
+            var options = {
+                name: "RSA-OAEP",
+                modulusLength: 4096,
+                publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
+                hash: {name: "SHA-512"}
+            };
+
+            var generate = window.crypto.subtle.generateKey(options, true, ["encrypt", "decrypt"]);
+            generate.then(function (keypair) {
+                resolve(keypair);
+            });
+        });
+    }
+
+    function exportKey(key) {
+        return new Promise(function (resolve) {
+            var exportKey = window.crypto.subtle.exportKey("jwk", key);
+            exportKey.then(function (keypair) {
+                resolve(keypair);
+            })
+        });
+    }
+
+    function importKey(key, isPrivate) {
+        return new Promise(function (resolve) {
+            var options = {
+                name: "RSA-OAEP",
+                hash: {name: "SHA-512"}
+            };
+            var scopes = [];
+            if (isPrivate) {
+                scopes = ["decrypt"];
+            } else {
+                scopes = ["encrypt"];
+            }
+            var importKey = window.crypto.subtle.importKey("jwk", key, options, true, scopes);
+            importKey.then(function (key) {
+                resolve(key);
+            })
+        });
+    }
+
+    function encrypt(publicKey, data) {
+        return new Promise(function (resolve) {
+            var options = {
+                name: "RSA-OAEP"
+            };
+            var encryptData = window.crypto.subtle.encrypt(options, publicKey, data);
+            encryptData.then(function (data) {
+                resolve(data);
+            })
+        });
+    }
+
+    function decrypt(privateKey, data) {
+        return new Promise(function (resolve) {
+            var options = {
+                name: "RSA-OAEP"
+            };
+            var decryptData = window.crypto.subtle.decrypt(options, privateKey, data);
+            decryptData.then(function (data) {
+                resolve(data);
+            })
+        });
+    }
+
+    function arrayBufferToString(buffer) {
+        return String.fromCharCode.apply(null, new Uint16Array(buffer));
+    }
+
+    function stringToArrayBuffer(str) {
+        var buffer = new ArrayBuffer(str.length * 2); // 2 bytes for each char
+        var bufferView = new Uint16Array(buffer);
+        for (var i = 0, strLen = str.length; i < strLen; i++) {
+            bufferView[i] = str.charCodeAt(i);
+        }
+        return buffer;
+    }
+
+    var stringToEncrypt = 'hello world!';
+
+    generateKeyPair().then(function (keypair) {
+        var exportKeys = [exportKey(keypair.publicKey), exportKey(keypair.privateKey)];
+        Promise.all(exportKeys).then(function (keys) {
+            var publicKey = keys[0];
+            var privateKey = keys[1];
+            var importKeys = [importKey(publicKey, false), importKey(privateKey, true)];
+            Promise.all(importKeys).then(function (keys) {
+                var publicKey = keys[0];
+                var privateKey = keys[1];
+                var data = stringToArrayBuffer(stringToEncrypt);
+                encrypt(publicKey, data).then(function (encryptedData) {
+                    decrypt(privateKey, encryptedData).then(function (decryptedData) {
+                        var data = arrayBufferToString(decryptedData);
+                        if (data === stringToEncrypt) {
+                            document.write(stringToEncrypt);
+                        } else {
+                            document.write('Shit hit the fan. Data isn\'t the same.');
+                        }
+                    });
+                });
+            });
+        });
+    });
+</script>
+</body>
+</html>
