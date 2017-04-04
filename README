@@ -3,7 +3,7 @@ Playing around with the web crypto api.
 This generates a public / private key pair using RSA-OAEP with a mod length of 4096 and a SHA-512 hash.
 
 Helpful links:
-- [https://github.com/diafygi/webcrypto-examples/](https://github.com/diafygi/webcrypto-examples/)
-- [https://diafygi.github.io/webcrypto-examples/](https://diafygi.github.io/webcrypto-examples/)
-- [https://en.wikipedia.org/wiki/Optimal_asymmetric_encryption_padding](https://en.wikipedia.org/wiki/Optimal_asymmetric_encryption_padding)
-- [http://caniuse.com/#feat=cryptography](http://caniuse.com/#feat=cryptography)
+- https://github.com/diafygi/webcrypto-examples/
+- https://diafygi.github.io/webcrypto-examples/
+- https://en.wikipedia.org/wiki/Optimal_asymmetric_encryption_padding
+- http://caniuse.com/#feat=cryptography
